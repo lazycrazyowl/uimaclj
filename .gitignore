@@ -3,3 +3,4 @@ pom.xml
 /lib/
 /target/
 .lein-deps-sum
+.lein-repl-history

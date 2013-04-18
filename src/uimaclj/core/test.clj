@@ -11,17 +11,31 @@
 (defn my-annotator-fn [uima-context jcas]
   ;; do your annotator work here. you can use the uima-context
   ;; to access configuration parameter or external resources
-  (println "hello world"))
+  (println "hello world"
+           (seq (.getConfigParameterNames uima-context))))
+
+(defn- uima-params [& params]
+  (->> params
+       (partition 2)
+       (mapcat (fn [[k v]] [(str k) v]))))
+
+(defmacro create-primitive [f & params]
+  `(let [m# (meta ~(resolve (symbol f)))
+         f-ns# (str (:ns m#))
+         f-name# (str (:name m#))]
+     (AnalysisEngineFactory/createPrimitive
+       CljAnnotator
+       (to-array
+         (concat
+           [CljAnnotator/PARAM_NS f-ns#
+            CljAnnotator/PARAM_FN f-name#]
+           (uima-params ~@params))))))
 
 ;; How to run pipeline
 ;; The CljAnnotator gets two parameter the namespace and the
 ;; function name you want to call.
 (defn -main []
   (let [jcas (JCasFactory/createJCas)
-        ae (AnalysisEngineFactory/createPrimitive
-             CljAnnotator
-             (to-array
-               [CljAnnotator/PARAM_NS "uimaclj.core.test"
-                CljAnnotator/PARAM_FN "my-annotator-fn"]))]
+        ae (create-primitive my-annotator-fn :param1 "value1" :param2 "value2")]
     (.process ae jcas)
     nil))
