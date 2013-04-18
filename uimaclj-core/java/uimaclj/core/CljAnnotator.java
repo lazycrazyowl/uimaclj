@@ -8,7 +8,6 @@ import org.uimafit.factory.AnalysisEngineFactory;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.UimaContext;
 import org.apache.uima.resource.ResourceInitializationException;
-import uimaclj.helper.cljhelper;
 import clojure.lang.RT;
 import clojure.lang.Var;
 import clojure.lang.Compiler;
