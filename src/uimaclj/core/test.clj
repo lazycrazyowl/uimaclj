@@ -15,7 +15,6 @@
        (mapcat (fn [[k v]] [(str k) (str v)]))))
 
 (defn create-primitive-description [f & params]
-  (println (str (.getName (type f))))
   (let [desc (AnalysisEngineFactory/createPrimitiveDescription
                CljAnnotator (to-array (apply uima-params params)))]
     (ExternalResourceFactory/bindResource
