@@ -7,21 +7,7 @@
            org.apache.uima.jcas.JCas
            org.apache.uima.UimaContext
            uimaclj.core.CljAnnotator
-           uimaclj.core.ClojureResourceProvider
-           ))
-
-(defn get-config-param [uima-context k]
-  (.getConfigParameterValue uima-context (str k)))
-
-;; A annotator is just a simple function with 
-;; two arguments the uima-context and the jcas
-(defn my-annotator-fn [uima-context jcas]
-  ;; do your annotator work here. you can use the uima-context
-  ;; to access configuration parameter or external resources
-  (println "hello world"
-           (seq (.getConfigParameterNames uima-context))
-           (get-config-param uima-context :param1)
-           (get-config-param uima-context :param2)))
+           uimaclj.core.ClojureResourceProvider))
 
 (defn- uima-params [& params]
   (->> params
@@ -43,7 +29,7 @@
 (defn -main []
   (let [jcas (JCasFactory/createJCas)
         desc (create-primitive-description
-               my-annotator-fn
+               (fn [context jcas] (println "hello world"))
                :param1 "value1" :param2 "value2")
         ae (AnalysisEngineFactory/createAggregate desc)]
     (.process ae jcas)
