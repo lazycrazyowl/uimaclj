@@ -37,20 +37,6 @@
       (into-array String [ClojureResourceProvider/PARAM_CLOJURE_FN (.getName (type f))]))
     desc))
 
-(defmacro create-primitive [f & params]
-  `(let [m# (meta ~(resolve (symbol f)))
-         f-ns# (str (:ns m#))
-         f-name# (str (:name m#))]
-     (AnalysisEngineFactory/createPrimitive
-       CljAnnotator
-       (to-array
-         (concat
-           [CljAnnotator/PARAM_NS f-ns#
-            CljAnnotator/PARAM_FN f-name#
-            CljAnnotator/PARAM_CLASS (.getName (type ~f))
-            ]
-           (uima-params ~@params))))))
-
 ;; How to run pipeline
 ;; The CljAnnotator gets two parameter the namespace and the
 ;; function name you want to call.
