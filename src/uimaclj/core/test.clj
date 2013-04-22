@@ -2,11 +2,14 @@
   (:import org.uimafit.component.JCasAnnotator_ImplBase
            org.apache.uima.analysis_engine.AnalysisEngine
            org.uimafit.factory.AnalysisEngineFactory
+           org.uimafit.factory.CollectionReaderFactory
            org.uimafit.factory.ExternalResourceFactory
            org.uimafit.factory.JCasFactory
+           org.uimafit.pipeline.SimplePipeline;
            org.apache.uima.jcas.JCas
            org.apache.uima.UimaContext
            uimaclj.core.CljAnnotator
+           uimaclj.core.CljCollectionReader
            uimaclj.core.ClojureResourceProvider))
 
 (defn- uima-params [& params]
@@ -29,14 +32,26 @@
         [CljAnnotator/PARAM_CLOJURE_RESOURCE (clj-resource-description f)]
         (apply uima-params params)))))
 
+(defn clj-collection-reader [init-fn process-fn & params]
+  (CollectionReaderFactory/createCollectionReader
+    CljCollectionReader
+    (to-array
+      (concat
+        [CljCollectionReader/PARAM_INIT_FN_RESOURCE (clj-resource-description init-fn)
+         CljCollectionReader/PARAM_PROCESS_FN_RESOURCE (clj-resource-description process-fn)]
+        (apply uima-params params)))))
+
+(defn run-pipeline [reader & aes]
+  (SimplePipeline/runPipeline reader (into-array AnalysisEngine aes)))
+
 ;; How to run pipeline
 ;; The CljAnnotator gets two parameter the namespace and the
 ;; function name you want to call.
 (defn -main []
-  (let [a 1
-        jcas (JCasFactory/createJCas)
-        ae (clj-annotator
-             (fn [context jcas] (println "hello world"))
-             :param1 "value1" :param2 "value2")]
-    (.process ae jcas)
-    nil))
+  (let [reader (clj-collection-reader
+                 (fn [context] ["hello" "little" "world"])
+                 (fn [txt cas context]
+                   (.setDocumentText cas txt)))
+        printer (clj-annotator
+                  (fn [context cas] (println (.getDocumentText cas))))]
+    (run-pipeline reader printer)))
